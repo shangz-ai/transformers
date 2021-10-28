@@ -370,17 +370,10 @@ class QDQBertSelfOutput(nn.Module):
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
-        # Quantize the inputs to the residual add
-        self.add_local_input_quantizer = TensorQuantizer(quant_nn.QuantLinear.default_quant_desc_input)
-        self.add_residual_input_quantizer = TensorQuantizer(quant_nn.QuantLinear.default_quant_desc_input)
-
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
-        # Quantize the inputs to the residual add
-        add_local = self.add_local_input_quantizer(hidden_states)
-        add_residual = self.add_residual_input_quantizer(input_tensor)
-        hidden_states = self.LayerNorm(add_local + add_residual)
+        hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
 
@@ -457,17 +450,10 @@ class QDQBertOutput(nn.Module):
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
-        # Quantize the inputs to the residual add
-        self.add_local_input_quantizer = TensorQuantizer(quant_nn.QuantLinear.default_quant_desc_input)
-        self.add_residual_input_quantizer = TensorQuantizer(quant_nn.QuantLinear.default_quant_desc_input)
-
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
-        # Quantize the inputs to the residual add
-        add_local = self.add_local_input_quantizer(hidden_states)
-        add_residual = self.add_residual_input_quantizer(input_tensor)
-        hidden_states = self.LayerNorm(add_local + add_residual)
+        hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
 
